@@ -22,7 +22,9 @@ class DiscordChannel {
     });
   }
 }
-const targetDiscordChannel = new DiscordChannel(config['discord-target-channel-id']);
+const responseDiscordChannel = new DiscordChannel(config['discord-response-channel-id']);
+const notifyDiscordChannel = new DiscordChannel(config['discord-notifications-channel-id']);
+
 setTimeout(() => {
   console.log("Logging in to discord...");
   discordClient.login(discordToken).then(() => {
@@ -35,7 +37,7 @@ setTimeout(() => {
 twitch.on('messageStreamStarted', (stream) => {
   let notificationMessage = '<' + stream.url + '> just went live: ' + stream.title;
   console.log(notificationMessage);
-  targetDiscordChannel.send(notificationMessage).then((message) => {
+  notifyDiscordChannel.send(notificationMessage).then((message) => {
     console.log(message);
   }).catch((e) => {
     console.log(e);
@@ -64,7 +66,7 @@ function toWeirdCase (pattern, str) {
 discordClient.on('message', (message) => {
   let streamCommandRegex = /^(\.|!)streams$/i;
   let streamNotCased = /^(\.|!)streams$/;
-  if (message.channel.id === targetDiscordChannel.id && streamCommandRegex.test(message.content)) {
+  if (message.channel.id === responseDiscordChannel.id && streamCommandRegex.test(message.content)) {
     let applyWeirdCase = !streamNotCased.test(message.content);
     let streams = twitch.getStreams();
     let nobodyStreaming = 'Nobody is streaming.';
