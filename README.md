@@ -41,17 +41,21 @@ module.exports = {
 Edit the settings in the `config.js` file:
 ```
 module.exports = {
-  "discord-target-channel-id": '123456789123456789',
+  "discord-response-channel-id": '123456789123456789',
+  "discord-notifications-channel-id": '123456789123456789',
   "target-game-id": '123456',
   "bot-user-name": 'Twitch Streams Bot',
   "bot-avatar-url": 'https://discuss.dev.twitch.tv/uploads/default/original/2X/1/1bce496ed4973e05b444bbc5519d8d350ea49c76.png',
   "bot-currently-playing": 'Twitch',
 };
 ```
+To get the channel id of a channel in your discord server, turn on developer mode in your discord user settings (under "Appearance"). You can then get the channel ID of a channel by right-clicking it and selecting "Copy ID".
 
-* `discord-target-channel-id`
-  * To get the channel id of the channel you want the discord bot to post to, turn on developer mode in your discord user settings (under "Appearance").
-  * You can then get the channel ID of a channel by right-clicking it and selecting "Copy ID".
+* `discord-response-channel-id`
+  * The ID of the channel you type `.streams` in, to get a list of streams from the bot. (the bot will also respond in this channel)
+
+* `discord-notifications-channel-id`
+  * The channel the bot posts "going live" notifications to.
 
 * `target-game-id`
   * This is the ID of the game you want to track. An easy way to find a game's ID is by searching for it on [twitchinsights.net/](http://twitchinsights.net/).
