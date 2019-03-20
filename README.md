@@ -6,7 +6,7 @@ Note: It only tracks one game, and only posts to one discord channel. Edit the c
 
 Type `.streams` to display currently live twitch streams.
 
-Based off the [Dustforce Discord Bot](https://github.com/Joel4558/Dustforce-discord)
+Based off the [Dustforce Discord Bot](https://github.com/NoLifeJoel/Dustforce)
 
 # How to set up:
 
