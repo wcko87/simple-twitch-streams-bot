@@ -1,6 +1,8 @@
+const fs = require('./filesystem');
 const Discord = require('discord.js');
 const discordClient = new Discord.Client();
-const discordToken = require('./../tokens')["discord-token"];
+const path = require('path');
+const discordToken = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'tokens.json'), 'utf-8'))["discord-token"];
 const twitch = require('./twitch-helix');
 const config = require('./config');
 class DiscordChannel {
