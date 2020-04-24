@@ -1,10 +1,9 @@
-const twitch = require('twitch-helix-api');
+const twitch = require('./twitch-helix-api');
 const EventEmitter = require('events');
 const config = require('./config');
 
 const streamEmitter = new EventEmitter();
 let startup = false;
-twitch.clientID = require('./../tokens')["twitch-client-id"];
 let streams = { };
 function streamLoop () {
   // Uncomment for logging.
@@ -18,7 +17,7 @@ function streamLoop () {
     ],
     "type": 'live'
   }).then((data) => {
-    let res = data.response.data;
+    let res = data.data.data;
     let user_ids = [ ];
     for (let stream of res) {
       user_ids.push(stream["user_id"]);
@@ -39,7 +38,7 @@ function streamLoop () {
     if (data === null) {
       return;
     }
-    let res = data.response.data;
+    let res = data.data.data;
     for (let stream of res) {
       if (typeof streams[stream["id"]]["url"] === 'undefined') {
         if (startup === true) {

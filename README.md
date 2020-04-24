@@ -15,22 +15,24 @@ Based off the [Dustforce Discord Bot](https://github.com/NoLifeJoel/Dustforce)
 * [Node.js](https://nodejs.org/)
 
 ### Step 1
-Create a file named `tokens.js` in the parent directory of this file, with the following contents:
+Create a file named `tokens.json` in the parent directory of this file, with the following contents:
 ```
-module.exports = {
+{
   "twitch-client-id": "abcdefhijklmnopqrstuvwxyz",
+  "twitch-client-secret": "abcdefhijklmnopqrstuvwxyz",
+  "twitch-client-token": null,
   "discord-token": "ABCDEFHIJKLMNOPQRSTUVWXYZ.ABCDEFHIJKLMNOPQRSTUVWXYZ"
-};
+}
 ```
-(do not let tokens.js be publicly visible, as it will contain the sensitive twitch/discord ids/tokens required for the bot to work)
+(do not let tokens.json be publicly visible, as it will contain the sensitive twitch/discord ids/tokens required for the bot to work)
 
 `twitch-client-id`
-  1. Go to [glass.twitch.tv](https://glass.twitch.tv/login)
-  2. Click **View Apps**
+  1. Go to [dev.twitch.tv](https://dev.twitch.tv/login)
+  2. Click **Your Console**
   3. Click **Register Your Application**
   4. Type whatever you want in the fields (you can use `http://localhost` for OAuth Redirect URL) and click **Create**
   5. Click **Manage** on the new app you created
-  6. copy out the Client ID.
+  6. Copy the Client ID and secret. You can use a token if you already have one, otherwise leave it null and one will be generated for you.
 
 `discord-token`
   * See [Setting Up a Bot Application](https://discordjs.guide/#/preparations/setting-up-a-bot-application)
