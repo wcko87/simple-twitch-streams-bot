@@ -25,7 +25,8 @@ function apiRequest (path, query) {
     "path": '/helix/' + path + '?' + query,
     "method": 'GET',
     "headers": {
-      "Authorization": 'Bearer ' + config["twitch-client-token"]
+      "Authorization": 'Bearer ' + config["twitch-client-token"],
+      "Client-ID": config["twitch-client-id"]
     },
     "special": {
       "https": true
