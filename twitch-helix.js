@@ -18,6 +18,13 @@ function streamLoop () {
     "type": 'live'
   }).then((data) => {
     let res = data.data.data;
+    console.log(data.data);
+    if (res === undefined) {
+      console.log('ERROR: ' + data.data.error);
+      return null;
+    } else {
+      console.log('request successful');
+    }
     let user_ids = [ ];
     for (let stream of res) {
       user_ids.push(stream["user_id"]);
@@ -39,6 +46,13 @@ function streamLoop () {
       return;
     }
     let res = data.data.data;
+    console.log(data.data);
+    if (res === undefined) {
+      console.log('ERROR: ' + data.data.error);
+      return null;
+    } else {
+      console.log('request successful');
+    }
     for (let stream of res) {
       if (typeof streams[stream["id"]]["url"] === 'undefined') {
         if (startup === true) {
