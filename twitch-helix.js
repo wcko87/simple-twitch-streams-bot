@@ -18,7 +18,6 @@ function streamLoop () {
     "type": 'live'
   }).then((data) => {
     let res = data.data.data;
-    console.log(data.data);
     if (res === undefined) {
       console.log('ERROR: ' + data.data.error);
       return null;
@@ -46,7 +45,6 @@ function streamLoop () {
       return;
     }
     let res = data.data.data;
-    console.log(data.data);
     if (res === undefined) {
       console.log('ERROR: ' + data.data.error);
       return null;
