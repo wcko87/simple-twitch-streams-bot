@@ -93,9 +93,17 @@ function tokenLoop () {
     });
   }
 }
-setTimeout(tokenLoop, 5000);
+setTimeout(tokenLoop, 1200000);
 function getUsers (data) {
   return new Promise((resolve, reject) => {
+    if (typeof config["twitch-client-token"] !== 'string') {
+      console.log('client-token in tokens.json is not a string, fetching a new one...');
+      getToken().then((token) => {
+        writeToken(token);
+        return getUsers(data);
+      }).then(resolve, reject);
+      return null;
+    }
     if (typeof data === 'undefined' || (typeof data.id === 'undefined' && typeof data.login === 'undefined')) {
       reject('You must specify user id(s) or username(s) as a string or an array.');
     } else if ((Array.isArray(data.id) && data.id.length > 100) || (Array.isArray(data.login) && data.login.length > 100)) {
@@ -110,6 +118,14 @@ function getUsers (data) {
 }
 function getStreams (data) {
   return new Promise((resolve, reject) => {
+    if (typeof config["twitch-client-token"] !== 'string') {
+      console.log('client-token in tokens.json is not a string, fetching a new one...');
+      getToken().then((token) => {
+        writeToken(token);
+        return getStreams(data);
+      }).then(resolve, reject);
+      return null;
+    }
     if (typeof data === 'undefined' || (typeof data.game_id === 'undefined' && typeof data.user_id === 'undefined')) {
       reject('You must specify game id(s) or user id(s) as a string or an array.');
     } else if ((Array.isArray(data.game_id) && data.game_id.length > 100) || (Array.isArray(data.user_id) && data.user_id.length > 100)) {
