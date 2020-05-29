@@ -6,11 +6,11 @@ const config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'tokens.jso
 let token_timer = 0;
 let token_valid = false;
 function writeToken (newToken) {
-  config.twitch_client_token = newToken;
+  config["twitch-client-token"] = newToken;
   fs.readFile(path.join(__dirname, '..', 'tokens.json'), 'utf-8').then((data) => {
     data = JSON.parse(data);
     if (typeof data === 'object') {
-      data.twitch_client_token = newToken;
+      data["twitch-client-token"] = newToken;
       data = JSON.stringify(data, null, 2);
       fs.writeFile(path.join(__dirname, '..', 'tokens.json'), data, 'utf-8').catch((e) => {
         console.error(e);
@@ -62,7 +62,7 @@ function validateToken (token) {
       "https": true
     },
     "headers": {
-      "Authorization": 'OAuth ' + config.twitch_client_token
+      "Authorization": 'OAuth ' + config["twitch-client-token"]
     }
   }).then((response) => {
     let res = JSON.parse(response.data);
@@ -83,7 +83,7 @@ function validateToken (token) {
 }
 function tokenLoop () {
   if (typeof config["twitch-client-token"] !== 'string') {
-    console.log('client-token in config.json is not a string, fetching a new one...');
+    console.log('client-token in tokens.json is not a string, fetching a new one...');
     getToken().then(() => {
       setTimeout(tokenLoop, 1200000);
     });
