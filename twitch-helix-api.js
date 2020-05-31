@@ -84,11 +84,15 @@ function validateToken (token) {
 function tokenLoop () {
   if (typeof config["twitch-client-token"] !== 'string') {
     console.log('client-token in tokens.json is not a string, fetching a new one...');
-    getToken().then(() => {
+    getToken().catch((e) => {
+      console.error(e);
+    }).then(() => {
       setTimeout(tokenLoop, 1200000);
     });
   } else {
-    validateToken(config["twitch-client-token"]).then(() => {
+    validateToken(config["twitch-client-token"]).catch((e) => {
+      console.error(e);
+    }).then(() => {
       setTimeout(tokenLoop, 1200000);
     });
   }
