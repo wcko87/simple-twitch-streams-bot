@@ -39,7 +39,7 @@ setTimeout(() => {
   });
 }, 5000);
 twitch.on('messageStreamStarted', (stream) => {
-  let notificationMessage = '<' + stream.url + '> just went live: ' + stream.title;
+  let notificationMessage = stream.url + ' just went live: ' + stream.title;
   console.log(notificationMessage);
   notifyDiscordChannel.send(notificationMessage).then((message) => {
     console.log(message);
