@@ -35,7 +35,9 @@ function streamLoop () {
       streams[stream["user_id"]]["url"] = 'https://www.twitch.tv/' + stream["user_login"];
       streams[stream["user_id"]]["user_name"] = stream["user_name"];
       streams[stream["user_id"]]["login"] = stream["user_login"];
-      console.log(stream)
+      if (startup === true) {
+        streamEmitter.emit('messageStreamStarted', streams[stream["user_id"]]);
+      }
     }
     return null;
   }).catch((e) => {
