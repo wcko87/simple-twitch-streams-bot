@@ -56,13 +56,14 @@ discordClient.on('ready', () => {
     console.log(e);
   }}
 
- discordClient.user.setPresence({
-        status: "online",  //You can show online, idle....
-        game: {
-            name: "GeoGuess Steams",  //The message shown
-            type: "WATCHING" //PLAYING: WATCHING: LISTENING: STREAMING:
-        }
-    });
+  discordClient.user.setPresence({
+    status: "online",  //You can show online, idle....
+    game: {
+      name: "GeoGuess Steams",  //The message shown
+      type: "WATCHING", //PLAYING: WATCHING: LISTENING: STREAMING:
+      url: "https://www.twitch.tv/directory/game/GeoGuess"
+    }
+  });
 });
 function toWeirdCase (pattern, str) {
   return str.split('').map((v, i) => pattern[i%7+1] === pattern[i%7+1].toLowerCase() ? v.toLowerCase() : v.toUpperCase()).join('');
