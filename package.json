@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "discord.js": "11.3.2"
+  },
+  "devDependencies": {
+    "dotenv": "^8.2.0"
   }
 }

@@ -2,9 +2,10 @@ const fs = require('./filesystem');
 const Discord = require('discord.js');
 const discordClient = new Discord.Client();
 const path = require('path');
-const discordToken = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'tokens.json'), 'utf-8'))["discord-token"];
 const twitch = require('./twitch-helix');
-const config = require('./config');
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 class DiscordChannel {
   constructor (id) {
     this.id = id;
@@ -24,12 +25,13 @@ class DiscordChannel {
     });
   }
 }
-const responseDiscordChannel = new DiscordChannel(config['discord-response-channel-id']);
-const notifyDiscordChannel = new DiscordChannel(config['discord-notifications-channel-id']);
+
+const responseDiscordChannel = new DiscordChannel(process.env.DISCORD_RESPONSE_CHANNEL_ID);
+const notifyDiscordChannel = new DiscordChannel(process.env.DISCORD_NOTIFICATIONS_CHANNEL_ID);
 
 setTimeout(() => {
   console.log("Logging in to discord...");
-  discordClient.login(discordToken).then(() => {
+  discordClient.login(process.env.DISCORD_TOKEN).then(() => {
     console.log("Discord login success");
   }).catch((e) => {
     console.log("Discord login failure");
@@ -53,14 +55,14 @@ discordClient.on('ready', () => {
     console.log('Failed to set ' + setting);
     console.log(e);
   }}
-  discordClient.user.setUsername(config['bot-user-name']).catch(failToSet('username'));
-  discordClient.user.setAvatar(config['bot-avatar-url']).catch(failToSet('avatar'));
-  discordClient.user.setPresence({
-    "status": 'online',
-    "game": {
-      "name": config['bot-currently-playing']
-    }
-  }).catch(failToSet('presence'));
+
+ discordClient.user.setPresence({
+        status: "online",  //You can show online, idle....
+        game: {
+            name: "GeoGuess Steams",  //The message shown
+            type: "WATCHING" //PLAYING: WATCHING: LISTENING: STREAMING:
+        }
+    });
 });
 function toWeirdCase (pattern, str) {
   return str.split('').map((v, i) => pattern[i%7+1] === pattern[i%7+1].toLowerCase() ? v.toLowerCase() : v.toUpperCase()).join('');

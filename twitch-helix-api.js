@@ -1,22 +1,10 @@
 const request = require('./request');
 const querystring = require('querystring');
-const fs = require('./filesystem');
-const path = require('path');
-const config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'tokens.json'), 'utf-8'));
+let twitchToken= null
 let token_timer = 0;
 let token_valid = false;
 function writeToken (newToken) {
-  config["twitch-client-token"] = newToken;
-  fs.readFile(path.join(__dirname, '..', 'tokens.json'), 'utf-8').then((data) => {
-    data = JSON.parse(data);
-    if (typeof data === 'object') {
-      data["twitch-client-token"] = newToken;
-      data = JSON.stringify(data, null, 2);
-      fs.writeFile(path.join(__dirname, '..', 'tokens.json'), data, 'utf-8').catch((e) => {
-        console.error(e);
-      });
-    }
-  });
+  twitchToken = newToken
 }
 function apiRequest (path, query) {
   query = querystring.stringify(query);
@@ -25,8 +13,8 @@ function apiRequest (path, query) {
     "path": '/helix/' + path + '?' + query,
     "method": 'GET',
     "headers": {
-      "Authorization": 'Bearer ' + config["twitch-client-token"],
-      "Client-ID": config["twitch-client-id"]
+      "Authorization": 'Bearer ' + twitchToken,
+      "Client-ID": process.env.TWITCH_CLIENT_ID
     },
     "special": {
       "https": true
@@ -38,8 +26,8 @@ function getToken () {
     "host": 'id.twitch.tv',
     "method": 'POST',
     "path": '/oauth2/token?' + querystring.stringify({
-      "client_id": config["twitch-client-id"],
-      "client_secret": config["twitch-client-secret"],
+      "client_id": process.env.TWITCH_CLIENT_ID,
+      "client_secret": process.env.TWITCH_CLIENT_SECRET,
       "grant_type": 'client_credentials'
     }),
     "special": {
@@ -62,7 +50,7 @@ function validateToken (token) {
       "https": true
     },
     "headers": {
-      "Authorization": 'OAuth ' + config["twitch-client-token"]
+      "Authorization": 'OAuth ' + twitchToken
     }
   }).then((response) => {
     let res = JSON.parse(response.data);
@@ -82,7 +70,7 @@ function validateToken (token) {
   });
 }
 function tokenLoop () {
-  if (typeof config["twitch-client-token"] !== 'string') {
+  if (typeof twitchToken !== 'string') {
     console.log('client-token in tokens.json is not a string, fetching a new one...');
     getToken().catch((e) => {
       console.error(e);
@@ -90,7 +78,7 @@ function tokenLoop () {
       setTimeout(tokenLoop, 1200000);
     });
   } else {
-    validateToken(config["twitch-client-token"]).catch((e) => {
+    validateToken(twitchToken).catch((e) => {
       console.error(e);
     }).then(() => {
       setTimeout(tokenLoop, 1200000);
@@ -100,7 +88,7 @@ function tokenLoop () {
 setTimeout(tokenLoop, 1200000);
 function getUsers (data) {
   return new Promise((resolve, reject) => {
-    if (typeof config["twitch-client-token"] !== 'string') {
+    if (typeof twitchToken !== 'string') {
       console.log('client-token in tokens.json is not a string, fetching a new one...');
       getToken().then((token) => {
         writeToken(token);
@@ -122,7 +110,7 @@ function getUsers (data) {
 }
 function getStreams (data) {
   return new Promise((resolve, reject) => {
-    if (typeof config["twitch-client-token"] !== 'string') {
+    if (typeof twitchToken !== 'string') {
       console.log('client-token in tokens.json is not a string, fetching a new one...');
       getToken().then((token) => {
         writeToken(token);

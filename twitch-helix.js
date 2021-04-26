@@ -1,6 +1,5 @@
 const twitch = require('./twitch-helix-api');
 const EventEmitter = require('events');
-const config = require('./config');
 
 const streamEmitter = new EventEmitter();
 let startup = false;
@@ -13,7 +12,7 @@ function streamLoop () {
   //console.log("'-------------------'");
   twitch.streams.getStreams({
     "game_id": [
-      config['target-game-id']
+      process.env.GAME_ID
     ],
     "type": 'live'
   }).then((data) => {
