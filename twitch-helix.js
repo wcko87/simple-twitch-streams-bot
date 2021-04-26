@@ -23,50 +23,21 @@ function streamLoop () {
     } else {
       console.log('request successful');
     }
-    let user_ids = [ ];
+    let user_ids = [];
     for (let stream of res) {
       user_ids.push(stream["user_id"]);
       if (typeof streams[stream["user_id"]] === 'undefined') {
-        streams[stream["user_id"]] = { };
+        streams[stream["user_id"]] = {};
       }
       streams[stream["user_id"]]["timer"] = 15;
       streams[stream["user_id"]]["title"] = stream["title"];
       streams[stream["user_id"]]["viewer_count"] = stream["viewer_count"];
-    }
-    if (user_ids.length > 0) {
-      return twitch.users.getUsers({
-        "id": user_ids
-      });
+      streams[stream["user_id"]]["url"] = 'https://www.twitch.tv/' + stream["user_login"];
+      streams[stream["user_id"]]["user_name"] = stream["user_name"];
+      streams[stream["user_id"]]["login"] = stream["user_login"];
+      console.log(stream)
     }
     return null;
-  }).then((data) => {
-    if (data === null) {
-      return;
-    }
-    let res = data.data.data;
-    if (res === undefined) {
-      console.log('ERROR: ' + data.data.error);
-      return null;
-    } else {
-      console.log('request successful');
-    }
-    for (let stream of res) {
-      if (typeof streams[stream["id"]]["url"] === 'undefined') {
-        if (startup === true) {
-          streamEmitter.emit('messageStreamStarted', {
-            "url": 'https://www.twitch.tv/' + stream["login"],
-            "title": streams[stream["id"]]["title"],
-            // "id": stream["id"],
-            // "display_name": stream["display_name"],
-            // "login": stream["login"]
-          });
-        }
-      }
-      streams[stream["id"]]["url"] = 'https://www.twitch.tv/' + stream["login"];
-      streams[stream["id"]]["display_name"] = stream["display_name"];
-      streams[stream["id"]]["login"] = stream["login"];
-    }
-    return;
   }).catch((e) => {
     console.error(e);
   }).then(() => {
