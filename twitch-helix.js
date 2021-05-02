@@ -28,16 +28,20 @@ function streamLoop () {
       if (!streams[stream["user_id"]]) {
         streams[stream["user_id"]] = {};
       }
-      streams[stream["user_id"]] = stream;
+      streams[stream["user_id"]] = {
+          ...streams[stream["user_id"]],
+          ...stream,
+      };
       streams[stream["user_id"]]["timer"] = 15;
       streams[stream["user_id"]]["url"] = 'https://www.twitch.tv/' + stream["user_login"];
       streams[stream["user_id"]]["login"] = stream["user_login"];
 
-      if (user_ids.length > 0) {
-        return twitch.users.getUsers({
-            "id": user_ids
-        });
-      }
+   
+    }
+    if (user_ids.length > 0) {
+      return twitch.users.getUsers({
+        "id": user_ids
+      });
     }
     return null;
   }).then((data) => {
