@@ -52,11 +52,14 @@ function streamLoop () {
       console.log('request successful');
     }
     for (const user of res) {
-        streams[user["id"]].user= user;
         
-        if (startup) {
-          streamEmitter.emit('messageStreamStarted', streams[user["id"]]);
+        if (!streams[stream["id"]].send ) {
+            streams[stream["id"]].send = true
+            if (startup) {
+                streamEmitter.emit('messageStreamStarted', streams[user["id"]]);
+            }
         }
+        streams[user["id"]].user= user;
     }
     return;
   })  
