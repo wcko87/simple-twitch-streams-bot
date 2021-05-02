@@ -98,7 +98,7 @@ discordClient.on('message', (message) => {
           streamTitle = toWeirdCase(message.content, streamTitle);
         }
         if (typeof streams[stream]["login"] !== 'undefined') {
-          streamsString +=  streamTitle + ' : ' +  streams[stream]["url"]  + '\n';
+          streamsString +=  streamTitle + ' : <' +  streams[stream]["url"]  + '>\n';
         }
       }
       if (streamsString === '') {
