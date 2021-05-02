@@ -13,7 +13,7 @@ class DiscordChannel {
   send (msg) {
     return new Promise ((resolve, reject) => {
       if (discordClient.ws.connection !== null && discordClient.status === 0) {
-        let channel = discordClient.channels.get(this.id);
+        const channel = discordClient.channels.get(this.id);
         if (typeof channel !== 'undefined') {
           resolve(channel.send(msg));
         } else {
@@ -39,10 +39,18 @@ setTimeout(() => {
   });
 }, 5000);
 twitch.on('messageStreamStarted', (stream) => {
-  let notificationMessage = stream.url + ' just went live: ' + stream.title;
-  console.log(notificationMessage);
-  notifyDiscordChannel.send(notificationMessage).then((message) => {
-    console.log(message);
+  const messageEmbed = new Discord.RichEmbed()
+	.setColor('#9146ff')
+	.setTitle(stream.title)
+	.setURL(stream.url)
+	.setAuthor(stream.user_name, stream.user.profile_image_url, stream.url)
+	.setDescription(stream.user.description)
+	.addField('Language', stream.language,  true)
+	.addField('Viewer Count', stream.viewer_count, true)
+	.setImage(stream.thumbnail_url.replace('{width}',1920).replace('{height}', 1080))
+	.setTimestamp();
+  notifyDiscordChannel.send(messageEmbed).then((message) => {
+    console.log(stream.title+" "+stream.url);
   }).catch((e) => {
     console.log(e);
   });
