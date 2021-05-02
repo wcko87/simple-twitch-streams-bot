@@ -53,13 +53,13 @@ function streamLoop () {
     }
     for (const user of res) {
         
-        if (!streams[stream["id"]].send ) {
-            streams[stream["id"]].send = true
+        streams[user["id"]].user= user;
+        if (!streams[user["id"]].send ) {
+            streams[user["id"]].send = true
             if (startup) {
                 streamEmitter.emit('messageStreamStarted', streams[user["id"]]);
             }
         }
-        streams[user["id"]].user= user;
     }
     return;
   })  
