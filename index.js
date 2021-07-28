@@ -1,6 +1,8 @@
 const fs = require('./filesystem');
 const Discord = require('discord.js');
-const discordClient = new Discord.Client();
+const discordClient = new Discord.Client({
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+});
 const twitch = require('./twitch-helix');
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -210,9 +212,18 @@ discordClient.on('message', async (message) => {
     }
   }
 });
-
 discordClient.on('messageReactionAdd', async (reaction, user) => {
-  if (GeoQuiz.messageId === reaction.message.id && !reaction.me) {
+  if (reaction.partial) {
+    // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
+    try {
+      await reaction.fetch();
+    } catch (error) {
+      console.error('Something went wrong when fetching the message: ', error);
+      // Return as `reaction.message.author` may be undefined/null
+      return;
+    }
+  }
+  if (GeoQuiz.messageId == reaction.message.id && !reaction.me) {
     logChannel
       .send(user.username + ' (' + user.id + ') ' + reaction.emoji.name)
       .catch((e) => {
