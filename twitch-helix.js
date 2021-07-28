@@ -53,7 +53,7 @@ function streamLoop () {
       console.log('ERROR: ' + data.data.error);
       return null;
     } else {
-      console.log('request successful');
+      // console.log('request successful');
     }
     for (const user of res) {
         

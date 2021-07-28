@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "discord.js": "^11.6.4"
+    "discord.js": "^12.5.3",
+    "firebase-admin": "^9.11.0"
   },
   "devDependencies": {
     "dotenv": "^8.2.0"

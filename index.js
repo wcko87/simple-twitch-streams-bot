@@ -1,19 +1,20 @@
 const fs = require('./filesystem');
 const Discord = require('discord.js');
 const discordClient = new Discord.Client();
-const path = require('path');
 const twitch = require('./twitch-helix');
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
+const Geo =  require('./geoquiz')
+const GeoQuiz = new Geo();
 class DiscordChannel {
   constructor (id) {
     this.id = id;
   }
   send (msg) {
     return new Promise ((resolve, reject) => {
-      if (discordClient.ws.connection !== null && discordClient.status === 0) {
-        const channel = discordClient.channels.get(this.id);
+      if (discordClient.ws.status === 0) {
+        const channel = discordClient.channels.cache.get(this.id);
         if (typeof channel !== 'undefined') {
           resolve(channel.send(msg));
         } else {
@@ -29,6 +30,8 @@ class DiscordChannel {
 const responseDiscordChannel = new DiscordChannel(process.env.DISCORD_RESPONSE_CHANNEL_ID);
 const notifyDiscordChannel = new DiscordChannel(process.env.DISCORD_NOTIFICATIONS_CHANNEL_ID);
 
+const logChannel = new DiscordChannel(process.env.DISCORD_LOG_CHANNEL_ID);
+
 setTimeout(() => {
   console.log("Logging in to discord...");
   discordClient.login(process.env.DISCORD_TOKEN).then(() => {
@@ -39,7 +42,7 @@ setTimeout(() => {
   });
 }, 5000);
 twitch.on('messageStreamStarted', (stream) => {
-  const messageEmbed = new Discord.RichEmbed()
+  const messageEmbed = new Discord.MessageEmbed()
 	.setColor('#9146ff')
 	.setTitle(stream.title)
 	.setURL(stream.url)
@@ -76,7 +79,7 @@ discordClient.on('ready', () => {
 function toWeirdCase (pattern, str) {
   return str.split('').map((v, i) => pattern[i%7+1] === pattern[i%7+1].toLowerCase() ? v.toLowerCase() : v.toUpperCase()).join('');
 }
-discordClient.on('message', (message) => {
+discordClient.on('message', async (message) => {
   let streamCommandRegex = /^(\.|!)streams$/i;
   let streamNotCased = /^(\.|!)streams$/;
   if (message.channel.id === responseDiscordChannel.id && streamCommandRegex.test(message.content)) {
@@ -108,5 +111,71 @@ discordClient.on('message', (message) => {
         message.channel.send(streamsString);
       }
     }
+  }
+
+  if(message.content.startsWith('!leaderboard')) {
+    let textScore = "**Leaderboard:**\n";
+    GeoQuiz.getAllScores().forEach(({userId,score}) => {
+      const user =discordClient.users.cache.get(userId)
+      if (user) {
+        textScore = textScore + `@${user.username} - ${score}\n`;
+      }
+    })
+   message.channel.send(textScore);
+
+  }
+
+  const REGEX_EMOJI = new RegExp('(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]){1,2}','g');
+
+  if(message.content.startsWith('GeoQuiz#') && message.member.hasPermission('ADMINISTRATOR')) {
+    const splitMsg = message.content.split('\n').slice(1);
+   
+    const emojis = splitMsg.map((ans) => ans.match(REGEX_EMOJI)[0])
+    
+    GeoQuiz.startQuestion(message.id);
+    const addEmoji = async (emoji) => {
+      return new Promise(async (resolve) => {
+        resolve(message.react(emoji[0])
+        .then(() =>{ 
+          if(emoji.length > 1) {
+            return addEmoji(emoji.slice(1));
+          }
+          return
+        }))
+      })
+    }
+    await addEmoji(emojis);
+
+   console.log("GeoQuiz.messageId: "+message.id);
+  }
+  if(message.content.startsWith('!correct') && message.member.hasPermission('ADMINISTRATOR')) {
+   GeoQuiz.rightAnswer = message.content.match(REGEX_EMOJI)[0]; 
+   console.log("GeoQuiz.rightAnswer: "+GeoQuiz.rightAnswer);
+  }
+  if(message.content.startsWith('!end') && message.member.hasPermission('ADMINISTRATOR')) {
+    GeoQuiz.endQuestion();
+    console.log("GeoQuiz.endQuestion");
+    const attachment = new MessageAttachment('./toalScore.json');
+    await logChannel.send(attachment);
+  }
+
+  if(message.content.startsWith('!messageId') && message.member.hasPermission('ADMINISTRATOR')) {
+    const messageId = message.content.split(' '); 
+    if(messageId.length == 2) {
+      GeoQuiz.startQuestion(messageId[1]);
+    }
+  }
+});
+
+discordClient.on('messageReactionAdd', async (reaction, user) => {
+  if(GeoQuiz.messageId === reaction.message.id && !reaction.me) {
+    logChannel.send(user.username +" ("+user.id+ ') ' + reaction.emoji.name).catch((e) => {
+      console.log(e);
+    });
+    GeoQuiz.addAnswer(user.id, reaction.emoji.name);
+
+    reaction.users.remove(user).catch((e) => {
+      console.log(e);
+    });
   }
 });
