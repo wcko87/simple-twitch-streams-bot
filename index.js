@@ -143,17 +143,6 @@ discordClient.on('message', async (message) => {
     }
   }
 
-  if (message.content.startsWith('!leaderboard')) {
-    let textScore = '**Leaderboard:**\n';
-    GeoQuiz.getAllScores().forEach(({ userId, score }) => {
-      const user = discordClient.users.cache.get(userId);
-      if (user) {
-        textScore = textScore + `@${user.username} - ${score}\n`;
-      }
-    });
-    message.channel.send(textScore);
-  }
-
   const REGEX_EMOJI = new RegExp(
     '(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]){1,2}',
     'g'
@@ -188,17 +177,27 @@ discordClient.on('message', async (message) => {
     message.content.startsWith('!correct') &&
     message.member.hasPermission('ADMINISTRATOR')
   ) {
-    GeoQuiz.rightAnswer = message.content.match(REGEX_EMOJI)[0];
-    console.log('GeoQuiz.rightAnswer: ' + GeoQuiz.rightAnswer);
+    const emoji = message.content.match(REGEX_EMOJI)[0];
+    GeoQuiz.setRightAnswer(emoji);
+    console.log('GeoQuiz.rightAnswer: ' + emoji);
+
+    message.delete();
   }
   if (
     message.content.startsWith('!end') &&
     message.member.hasPermission('ADMINISTRATOR')
   ) {
-    GeoQuiz.endQuestion();
+    const congratUsers = await GeoQuiz.endQuestion();
     console.log('GeoQuiz.endQuestion');
-    const attachment = new Discord.MessageAttachment('./toalScore.json');
-    await logChannel.send(attachment);
+    if (congratUsers.length > 0) {
+      const users = congratUsers
+        .map((userId) => discordClient.users.cache.get(userId).toString())
+        .join(',');
+      message.channel.send(
+        'Congratulations to ' + users + ' for getting the correct answer!'
+      );
+      message.delete();
+    }
   }
 
   if (
@@ -207,9 +206,26 @@ discordClient.on('message', async (message) => {
   ) {
     const messageId = message.content.split(' ');
     if (messageId.length == 2) {
-      GeoQuiz.startQuestion(messageId[1]);
-      console.log('GeoQuiz.startQuestion', messageId[1]);
+      GeoQuiz.setMessageId(messageId[1]);
+      console.log('GeoQuiz.setMessageId', messageId[1]);
+      message.delete();
     }
+  }
+
+  if (
+    message.content.startsWith('!leaderboard') &&
+    message.member.hasPermission('ADMINISTRATOR')
+  ) {
+    let textScore = '**Leaderboard:**\n';
+    const totals = await GeoQuiz.getAllScores();
+    totals.forEach(({ userId, score }) => {
+      const user = discordClient.users.cache.get(userId);
+      if (user) {
+        textScore = textScore + `@${user.username} - ${score}\n`;
+      }
+    });
+    message.channel.send(textScore);
+    message.delete();
   }
 });
 discordClient.on('messageReactionAdd', async (reaction, user) => {
@@ -223,7 +239,11 @@ discordClient.on('messageReactionAdd', async (reaction, user) => {
       return;
     }
   }
-  if (GeoQuiz.messageId == reaction.message.id && !reaction.me) {
+
+  if (
+    (await GeoQuiz.database.getMessageId()) == reaction.message.id &&
+    !reaction.me
+  ) {
     logChannel
       .send(user.username + ' (' + user.id + ') ' + reaction.emoji.name)
       .catch((e) => {
