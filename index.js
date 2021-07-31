@@ -190,11 +190,19 @@ discordClient.on('message', async (message) => {
     const congratUsers = await GeoQuiz.endQuestion();
     console.log('GeoQuiz.endQuestion');
     if (congratUsers.length > 0) {
-      const users = congratUsers
-        .map((userId) => discordClient.users.cache.get(userId).toString())
-        .join(',');
+      const users = [];
+      for (const userId in congratUsers) {
+        if (message.channel.guild.members.cache.has(userId)) {
+          user.push(message.channel.guild.members.cache.get(userId));
+        } else {
+          user.push(await message.channel.guild.members.fetch(userId));
+        }
+      }
+
       message.channel.send(
-        'Congratulations to ' + users + ' for getting the correct answer!'
+        'Congratulations to ' +
+          users.join(', ') +
+          ' for getting the correct answer!'
       );
       message.delete();
     }
@@ -218,12 +226,23 @@ discordClient.on('message', async (message) => {
   ) {
     let textScore = '**Leaderboard:**\n';
     const totals = await GeoQuiz.getAllScores();
-    totals.forEach(({ userId, score }) => {
-      const user = discordClient.users.cache.get(userId);
-      if (user) {
-        textScore = textScore + `@${user.username} - ${score}\n`;
+
+    for (const { userId, score } of totals) {
+      try {
+        let user;
+        if (message.channel.guild.members.cache.has(userId)) {
+          user = message.channel.guild.members.cache.get(userId);
+        } else {
+          user = await message.channel.guild.members.fetch(userId);
+        }
+        if (user) {
+          textScore = textScore + `@${user.displayName} - ${score}\n`;
+        }
+      } catch (e) {
+        console.log(e);
       }
-    });
+    }
+
     message.channel.send(textScore);
     message.delete();
   }
