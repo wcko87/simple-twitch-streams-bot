@@ -27,14 +27,17 @@ class GeoQuiz {
     const rightAnswer = await this.database.getRightAnswer();
     const answers = await this.database.getAnswers();
     const userIdWithRightAnswer = [];
-
     for (const userId in answers) {
       const answer = answers[userId];
       const score = +(rightAnswer === answer);
       if (score > 0) {
         userIdWithRightAnswer.push(userId);
       }
-      totalScore[userId] += score;
+      if (!totalScore[userId]) {
+        totalScore[userId] = score;
+      } else {
+        totalScore[userId] += score;
+      }
     }
     this.database.setTotals(totalScore);
     this.database.setQuizActive('');

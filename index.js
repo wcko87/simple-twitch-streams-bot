@@ -188,14 +188,22 @@ discordClient.on('message', async (message) => {
     message.member.hasPermission('ADMINISTRATOR')
   ) {
     const congratUsers = await GeoQuiz.endQuestion();
+
     console.log('GeoQuiz.endQuestion');
     if (congratUsers.length > 0) {
       const users = [];
-      for (const userId in congratUsers) {
-        if (message.channel.guild.members.cache.has(userId)) {
-          user.push(message.channel.guild.members.cache.get(userId));
-        } else {
-          user.push(await message.channel.guild.members.fetch(userId));
+
+      for (const userId of congratUsers) {
+        try {
+          if (message.channel.guild.members.cache.has(userId)) {
+            users.push(message.channel.guild.members.cache.get(userId));
+          } else {
+            console.log('User ' + userId + ' not found');
+            let user = await message.channel.guild.members.fetch(userId);
+            users.push(user);
+          }
+        } catch (e) {
+          console.log(e);
         }
       }
 
