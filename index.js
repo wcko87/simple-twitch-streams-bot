@@ -187,33 +187,37 @@ discordClient.on('message', async (message) => {
     message.content.startsWith('!end') &&
     message.member.hasPermission('ADMINISTRATOR')
   ) {
-    const congratUsers = await GeoQuiz.endQuestion();
-
-    console.log('GeoQuiz.endQuestion');
-    if (congratUsers.length > 0) {
-      const users = [];
-
-      for (const userId of congratUsers) {
-        try {
-          if (message.channel.guild.members.cache.has(userId)) {
-            users.push(message.channel.guild.members.cache.get(userId));
-          } else {
-            console.log('User ' + userId + ' not found');
-            let user = await message.channel.guild.members.fetch(userId);
-            users.push(user);
+    try{
+      const congratUsers = await GeoQuiz.endQuestion();
+      
+      console.log('GeoQuiz.endQuestion');
+      if (congratUsers.length > 0) {
+        const users = [];
+        
+        for (const userId of congratUsers) {
+          try {
+            if (message.channel.guild.members.cache.has(userId)) {
+              users.push(message.channel.guild.members.cache.get(userId));
+            } else {
+              console.log('User ' + userId + ' not found');
+              let user = await message.channel.guild.members.fetch(userId);
+              users.push(user);
+            }
+          } catch (e) {
+            console.log(e);
           }
-        } catch (e) {
-          console.log(e);
         }
-      }
-
-      message.channel.send(
-        'Congratulations to ' +
+        
+        message.channel.send(
+          'Congratulations to ' +
           users.join(', ') +
           ' for getting the correct answer!'
-      );
-      message.delete();
-    }
+          );
+          message.delete();
+        }
+      } catch(e){
+        logChannel.send('Send `!correct` before `!end`'); 
+      }
   }
 
   if (

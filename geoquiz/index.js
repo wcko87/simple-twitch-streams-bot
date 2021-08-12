@@ -23,8 +23,11 @@ class GeoQuiz {
   }
 
   async endQuestion() {
-    const totalScore = await this.database.getTotals();
     const rightAnswer = await this.database.getRightAnswer();
+    if(!rightAnswer){
+      throw 'Not rightAnswer set';
+    }
+    const totalScore = await this.database.getTotals();
     const answers = await this.database.getAnswers();
     const userIdWithRightAnswer = [];
     for (const userId in answers) {
